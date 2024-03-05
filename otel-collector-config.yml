@@ -1,0 +1,53 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+
+exporters:
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+  otlphttp/seq:
+    endpoint: http://seq:5341/ingest/otlp
+    headers:
+      "X-Seq-ApiKey": "Yx9lqBz4ehJGIgDoSxzp"
+    tls:
+      insecure: false
+  elasticsearch/log:
+    endpoints: [http://elasticsearch:9200]
+    logs_index: ""
+    logs_dynamic_index:
+       enabled: true
+    pipeline: index-date-suffix-pipeline
+    sending_queue:
+      enabled: true
+      num_consumers: 20
+      queue_size: 1000
+  influxdb:
+    endpoint: http://influxdb:8086
+    token: hAJeBwRjxZkvmD2D_pMSO74hA3XCPmS_YBCFpvomVOvEDPOs2ifDRtbXr-AsO57chaiE0sHtWXUHSUYvHBmx3Q==
+    org: piche
+    bucket: ai
+
+processors:
+  batch:
+
+extensions:
+  zpages:
+    endpoint: :55679
+
+service:
+  extensions: [zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [otlp/jaeger]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/seq]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [influxdb]

@@ -1,0 +1,162 @@
+version: "3"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - opentelemetry
+    volumes: 
+      - rabbitmq:/var/lib/rabbitmq
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+#      - 16686:16686
+      - 6831:6831/udp
+      - 6832:6832/udp
+    networks:
+      - opentelemetry
+
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    ports:
+      - 8086:8086
+    networks:
+      - opentelemetry
+    volumes:
+      - influxdb:/var/lib/influxdb2
+    environment:
+      - INFLUXDB_DB=db0
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=admin
+
+  ai-otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.88.0
+    container_name: otel-collector
+    volumes:
+      - ./otel-collector-config.yml:/etc/otelcol/otel-collector-config.yml
+    command: --config /etc/otelcol/otel-collector-config.yml
+    ports:
+      - 14278:14278
+      - 4318:4318
+      - 4317:4317
+      - 55679:55679
+    depends_on:
+      - jaeger
+    networks:
+      - opentelemetry
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"    
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - 3001:3001
+    networks:
+      - opentelemetry
+    volumes:
+      - grafana:/var/lib/grafana
+      - grafana-conf:/etc/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+  seq:
+    image: datalust/seq
+    container_name: seq
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
+        reservations:
+          cpus: '0.25'
+          memory: 20M
+    ports:
+      - 8001:80
+      - 5341:5341
+    environment:
+      ACCEPT_EULA: "Y"
+    networks:
+      - opentelemetry
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=elasticsearch
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - opentelemetry
+    logging:
+      driver: "json-file"
+      options:
+          max-size: "50m"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.9
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    networks:
+      - opentelemetry
+    depends_on:
+      - elasticsearch
+    logging:
+        driver: "json-file"
+        options:
+            max-size: "50m"
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/htpasswd:/etc/nginx/.htpasswd
+    depends_on:
+      - jaeger
+    networks:
+      - opentelemetry
+
+networks:
+  opentelemetry:
+    name: test-fastapi-sql-network
+    external: true
+
+volumes:
+  rabbitmq:
+    driver: local
+  influxdb:
+    driver: local
+  grafana:
+    driver: local
+  grafana-conf:
+    driver: local
+  elasticsearch:
+    driver: local

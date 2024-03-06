@@ -187,4 +187,4 @@ fabric.properties
 # idea folder, uncomment if you don't need it
 # .idea
 
-otel-collector-config-external.yaml
+otel-collector-config-external.yml

@@ -20,9 +20,16 @@ Running the app:
 `docker-compose -f docker/ai_core/docker-compose.yml up --build`
 
 Checking the health of your Elasticsearch cluster:
+```
 curl -X GET "localhost:9200/_cluster/health?pretty"
+```
 
 View a list of all indexes:
+```
 curl -X GET "localhost:9200/_cat/indices?v"
+```
 
-
+For autogeneration config file for open telemetry, use in the docker-compose
+```
+generate-config.sh
+```

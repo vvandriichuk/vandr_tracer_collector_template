@@ -1,0 +1,66 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+
+exporters:
+  debug:
+    verbosity: detailed
+  otlp/aspecto:
+    endpoint: otelcol.aspecto.io:4317
+    headers:
+      Authorization: ${ASPECTO_AUTH_TOKEN}
+  otlp/elasticsearchcloud:
+    endpoint: 3dc05b04c67446e0945bc0baa5af9b35.apm.us-central1.gcp.cloud.es.io:443
+    headers:
+      Authorization: ${ELASTICSEARCHCLOUD_AUTH_TOKEN}
+  otlphttp/seq:
+    endpoint: http://seq:5341/ingest/otlp
+    headers:
+      "X-Seq-ApiKey": ${SEQ_API_KEY}
+    tls:
+      insecure: false
+  elasticsearch/log:
+    endpoints: [http://elasticsearch:9200]
+    logs_index: ""
+    logs_dynamic_index:
+       enabled: true
+    pipeline: index-date-suffix-pipeline
+    sending_queue:
+      enabled: true
+      num_consumers: 20
+      queue_size: 1000
+  influxdb:
+    endpoint: http://influxdb:8086
+    token: ${INFLUXDB_TOKEN}
+    org: test
+    bucket: ai
+
+processors:
+  batch:
+  memory_limiter:
+    # 75% of maximum memory up to 2G
+    limit_mib: 1536
+    # 25% of limit up to 2G
+    spike_limit_mib: 512
+    check_interval: 5s
+
+extensions:
+  zpages:
+    endpoint: :55679
+
+service:
+  extensions: [zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [debug, otlp/aspecto, otlp/elasticsearchcloud]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [debug, otlphttp/seq, otlp/elasticsearchcloud]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug, influxdb]

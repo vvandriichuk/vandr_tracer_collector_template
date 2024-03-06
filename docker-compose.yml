@@ -41,7 +41,13 @@ services:
     container_name: otel-collector
     volumes:
       - ./otel-collector-config-external.yml:/etc/otelcol/otel-collector-config.yml
-    command: --config /etc/otelcol/otel-collector-config.yml
+      - ./generate-config.sh:/etc/otelcol/generate-config.sh
+    command: [ "/bin/sh", "/etc/otelcol/generate-config.sh" ]
+    environment:
+      ASPECTO_AUTH_TOKEN: ${ASPECTO_AUTH_TOKEN}
+      ELASTICSEARCHCLOUD_AUTH_TOKEN: ${ELASTICSEARCHCLOUD_AUTH_TOKEN}
+      SEQ_API_KEY: ${SEQ_API_KEY}
+      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
     ports:
       - 14278:14278
       - 4318:4318

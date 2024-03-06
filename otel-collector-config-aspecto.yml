@@ -26,8 +26,8 @@ exporters:
       queue_size: 1000
   influxdb:
     endpoint: http://influxdb:8086
-    token: hAJeBwRjxZkvmD2D_pMSO74hA3XCPmS_YBCFpvomVOvEDPOs2ifDRtbXr-AsO57chaiE0sHtWXUHSUYvHBmx3Q==
-    org: piche
+    token: yNlPzWC74VvgmYjSzJchrdqi8bTlunaBopiZoS8QLOBUz_F42tPYDEbbdJ5hcZLhzrnMX98z2fFJa5HeN5Bsyg==
+    org: test
     bucket: ai
 
 processors:
@@ -53,7 +53,7 @@ service:
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlphttp/seq]
+      exporters: [otlphttp/seq, elasticsearch/log]
     metrics:
       receivers: [otlp]
       processors: [batch]

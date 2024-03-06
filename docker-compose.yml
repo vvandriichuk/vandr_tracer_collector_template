@@ -40,7 +40,7 @@ services:
     image: otel/opentelemetry-collector-contrib:0.88.0
     container_name: otel-collector
     volumes:
-      - ./otel-collector-config.yml:/etc/otelcol/otel-collector-config.yml
+      - ./otel-collector-config-aspecto.yml:/etc/otelcol/otel-collector-config.yml
     command: --config /etc/otelcol/otel-collector-config.yml
     ports:
       - 14278:14278

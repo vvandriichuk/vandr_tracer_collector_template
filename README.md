@@ -4,6 +4,9 @@ Create docker network:
 Jaeger Logs GUI:
 `http://localhost:8088/`
 
+External Aspecto service to work with collected data:
+https://app.aspecto.io/73d79e62
+
 RabbitMQ Management GUI:
 `http://localhost:15672/`
 

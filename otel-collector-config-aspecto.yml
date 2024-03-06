@@ -4,10 +4,10 @@ receivers:
       grpc:
 
 exporters:
-  otlp/jaeger:
-    endpoint: jaeger:4317
-    tls:
-      insecure: true
+  otlp/aspecto:
+    endpoint: otelcol.aspecto.io:4317
+    headers:
+      Authorization: 6dd0f8b0-8fb8-4f9b-8bff-6e2011e49a7f
   otlphttp/seq:
     endpoint: http://seq:5341/ingest/otlp
     headers:
@@ -32,6 +32,12 @@ exporters:
 
 processors:
   batch:
+  memory_limiter:
+    # 75% of maximum memory up to 2G
+    limit_mib: 1536
+    # 25% of limit up to 2G
+    spike_limit_mib: 512
+    check_interval: 5s
 
 extensions:
   zpages:
@@ -42,10 +48,11 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp/jaeger]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/aspecto]
     logs:
       receivers: [otlp]
-      processors: [batch]
+      processors: [memory_limiter, batch]
       exporters: [otlphttp/seq]
     metrics:
       receivers: [otlp]

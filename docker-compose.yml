@@ -40,7 +40,7 @@ services:
     image: otel/opentelemetry-collector-contrib:0.88.0
     container_name: otel-collector
     volumes:
-      - ./otel-collector-config.yml:/etc/otelcol/otel-collector-config.yml
+      - ./otel-collector-config-external.yml:/etc/otelcol/otel-collector-config.yml
     command: --config /etc/otelcol/otel-collector-config.yml
     ports:
       - 14278:14278
@@ -137,8 +137,8 @@ services:
     ports:
       - "8088:8088"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf # Путь к вашему файлу конфигурации Nginx
-      - ./nginx/htpasswd:/etc/nginx/.htpasswd # Путь к вашему файлу .htpasswd
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/htpasswd:/etc/nginx/.htpasswd
     depends_on:
       - jaeger
     networks:
@@ -146,7 +146,7 @@ services:
 
 networks:
   opentelemetry:
-    name: opentelemetry-network
+    name: test-fastapi-sql-network
     external: true
 
 volumes:

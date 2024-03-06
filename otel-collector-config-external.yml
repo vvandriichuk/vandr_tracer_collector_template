@@ -4,10 +4,16 @@ receivers:
       grpc:
 
 exporters:
+  debug:
+    verbosity: detailed
   otlp/aspecto:
     endpoint: otelcol.aspecto.io:4317
     headers:
       Authorization: 6dd0f8b0-8fb8-4f9b-8bff-6e2011e49a7f
+  otlp/elasticsearchcloud:
+    endpoint: 3dc05b04c67446e0945bc0baa5af9b35.apm.us-central1.gcp.cloud.es.io:443
+    headers:
+      Authorization: "Bearer v5vkr9aSIZe24j7GB1"
   otlphttp/seq:
     endpoint: http://seq:5341/ingest/otlp
     headers:
@@ -49,12 +55,12 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlp/aspecto]
+      exporters: [debug, otlp/aspecto, otlp/elasticsearchcloud]
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlphttp/seq, elasticsearch/log]
+      exporters: [debug, otlphttp/seq, otlp/elasticsearchcloud]
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [influxdb]
+      exporters: [debug, influxdb]

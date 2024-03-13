@@ -19,6 +19,17 @@ http://localhost:8086/
 Running the app:
 `docker-compose -f docker/ai_core/docker-compose.yml up --build`
 
+For running Elasticsearch successfully first time you need to go to elasticsearch container and run command to create system users and pass and put it in the docker-compose file:
+```
+bin/elasticsearch-setup-passwords auto
+
+```
+
+Document for install APM Server inside the Elasticsearch container, read this article:
+```
+https://www.elastic.co/guide/en/observability/current/_step_1_set_up_fleet.html
+```
+
 Checking the health of your Elasticsearch cluster:
 ```
 curl -X GET "localhost:9200/_cluster/health?pretty"

@@ -188,3 +188,5 @@ fabric.properties
 # .idea
 
 otel-collector-config-external.yml
+otel-collector-config-server.yml
+docker-compose-server.yml

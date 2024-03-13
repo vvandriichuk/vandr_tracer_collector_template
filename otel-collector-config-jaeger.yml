@@ -14,16 +14,12 @@ exporters:
       "X-Seq-ApiKey": "Yx9lqBz4ehJGIgDoSxzp"
     tls:
       insecure: false
-  elasticsearch/log:
-    endpoints: [http://elasticsearch:9200]
-    logs_index: ""
-    logs_dynamic_index:
-       enabled: true
-    pipeline: index-date-suffix-pipeline
-    sending_queue:
-      enabled: true
-      num_consumers: 20
-      queue_size: 1000
+  otlp/elasticsearchlocal:
+    endpoint: "apm-server:8200"
+    headers:
+      Authorization: "Bearer v5vkr9aSIZe24j7GB1"
+    tls:
+      insecure: true
   influxdb:
     endpoint: http://influxdb:8086
     token: yNlPzWC74VvgmYjSzJchrdqi8bTlunaBopiZoS8QLOBUz_F42tPYDEbbdJ5hcZLhzrnMX98z2fFJa5HeN5Bsyg==
@@ -49,12 +45,12 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlp/jaeger]
+      exporters: [debug, otlp/jaeger, otlp/elasticsearchlocal]
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlphttp/seq]
+      exporters: [debug, otlphttp/seq, otlp/elasticsearchlocal]
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [influxdb]
+      exporters: [debug, influxdb, otlp/elasticsearchlocal]

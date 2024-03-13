@@ -1,0 +1,15 @@
+apm-server:
+  host: "0.0.0.0:8200"
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  username: "elastic"
+  password: "uPrPyoTXvg2dHrMFUlG8"
+
+otlp:
+  grpc:
+    enabled: true
+    host: "0.0.0.0:8200"
+  http:
+    enabled: true
+    host: "0.0.0.0:8200"

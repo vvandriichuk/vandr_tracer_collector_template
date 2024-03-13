@@ -41,13 +41,7 @@ services:
     container_name: otel-collector
     volumes:
       - ./otel-collector-config-external.yml:/etc/otelcol/otel-collector-config.yml
-      - ./generate-config.sh:/etc/otelcol/generate-config.sh
-    command: [ "/bin/sh", "/etc/otelcol/generate-config.sh" ]
-    environment:
-      ASPECTO_AUTH_TOKEN: ${ASPECTO_AUTH_TOKEN}
-      ELASTICSEARCHCLOUD_AUTH_TOKEN: ${ELASTICSEARCHCLOUD_AUTH_TOKEN}
-      SEQ_API_KEY: ${SEQ_API_KEY}
-      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+    command: --config /etc/otelcol/otel-collector-config.yml
     ports:
       - 14278:14278
       - 4318:4318
@@ -96,7 +90,7 @@ services:
       - opentelemetry
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
     container_name: elasticsearch
     environment:
       - node.name=elasticsearch
@@ -104,6 +98,7 @@ services:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - xpack.security.enabled=true
     ulimits:
       memlock:
         soft: -1
@@ -120,14 +115,32 @@ services:
       options:
           max-size: "50m"
 
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:8.12.2
+    container_name: apm-server
+    depends_on:
+      - elasticsearch
+    ports:
+      - "8200:8200"
+    environment:
+      - output.elasticsearch.hosts=["elasticsearch:9200"]
+      - output.elasticsearch.username=elastic
+      - output.elasticsearch.password=uPrPyoTXvg2dHrMFUlG8
+    volumes:
+      - ./apm-server.yml:/usr/share/apm-server/apm-server.yml
+    networks:
+      - opentelemetry
+
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.9
+    image: docker.elastic.co/kibana/kibana:8.12.2
     container_name: kibana
     ports:
       - "5601:5601"
     environment:
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      ELASTICSEARCH_URL: "http://elasticsearch:9200"
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+      ELASTICSEARCH_USERNAME: "kibana_system"
+      ELASTICSEARCH_PASSWORD: "XejRuQH9h0qiaaOnyc5L"
     networks:
       - opentelemetry
     depends_on:

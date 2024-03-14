@@ -11,6 +11,10 @@ services:
       - opentelemetry
     volumes: 
       - rabbitmq:/var/lib/rabbitmq
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
 
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -21,6 +25,10 @@ services:
       - 6832:6832/udp
     networks:
       - opentelemetry
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
 
   influxdb:
     image: influxdb:latest
@@ -35,6 +43,10 @@ services:
       - INFLUXDB_DB=db0
       - INFLUXDB_ADMIN_USER=admin
       - INFLUXDB_ADMIN_PASSWORD=admin
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
 
   ai-otel-collector:
     image: otel/opentelemetry-collector-contrib:0.88.0
@@ -69,6 +81,10 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
 
   seq:
     image: datalust/seq
@@ -88,6 +104,10 @@ services:
       ACCEPT_EULA: "Y"
     networks:
       - opentelemetry
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
@@ -130,6 +150,10 @@ services:
       - ./apm-server.yml:/usr/share/apm-server/apm-server.yml
     networks:
       - opentelemetry
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.12.2
@@ -162,6 +186,10 @@ services:
       - jaeger
     networks:
       - opentelemetry
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
 
 networks:
   opentelemetry:
